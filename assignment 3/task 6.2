@@ -1,0 +1,50 @@
+class Wallet {
+    private final int id;
+    private int balance;
+
+    Wallet(int id, int balance) {
+        this.id = id;
+        this.balance = balance;
+    }
+
+    int getId() { return id; }
+    int getBalance() { return balance; }
+
+    void debit(int amount) { balance -= amount; }
+    void credit(int amount) { balance += amount; }
+}
+
+public class WalletTransfer {
+    public static void transfer(Wallet from, Wallet to, int amount) {
+        Wallet first = from.getId() < to.getId() ? from : to;
+        Wallet second = from.getId() < to.getId() ? to : from;
+
+        synchronized (first) {
+            synchronized (second) {
+                if (amount > 0 && from.getBalance() >= amount) {
+                    from.debit(amount);
+                    to.credit(amount);
+                    System.out.println("Transferred Rs. " + amount);
+                } else {
+                    System.out.println("Transfer rejected.");
+                }
+            }
+        }
+    }
+
+    public static void main(String[] args) throws InterruptedException {
+        Wallet a = new Wallet(1, 1000);
+        Wallet b = new Wallet(2, 1000);
+
+        Thread t1 = new Thread(() -> transfer(a, b, 100));
+        Thread t2 = new Thread(() -> transfer(b, a, 200));
+
+        t1.start();
+        t2.start();
+        t1.join();
+        t2.join();
+
+        System.out.println("Wallet A balance: " + a.getBalance());
+        System.out.println("Wallet B balance: " + b.getBalance());
+    }
+}
