@@ -1,0 +1,101 @@
+import java.io.IOException;
+import java.nio.file.*;
+import java.util.*;
+import java.util.concurrent.*;
+
+class ProcessingResult {
+    final String fileName;
+    final boolean success;
+    final String message;
+
+    ProcessingResult(String fileName, boolean success, String message) {
+        this.fileName = fileName;
+        this.success = success;
+        this.message = message;
+    }
+}
+
+class ScoreTask implements Callable<ProcessingResult> {
+    private final Path file;
+
+    ScoreTask(Path file) {
+        this.file = file;
+    }
+
+    public ProcessingResult call() {
+        try {
+            String text = Files.readString(file).trim();
+            if (text.isEmpty()) {
+                throw new IllegalArgumentException("Empty score file");
+            }
+
+            int score = Integer.parseInt(text);
+            if (score < 0 || score > 100) {
+                throw new IllegalArgumentException("Score must be between 0 and 100");
+            }
+
+            String result = score >= 50 ? "PASS" : "FAIL";
+            return new ProcessingResult(file.getFileName().toString(), true,
+                    "Score: " + score + ", Result: " + result);
+        } catch (IOException | NumberFormatException | IllegalArgumentException e) {
+            return new ProcessingResult(file.getFileName().toString(), false,
+                    "Processing failed: " + e.getMessage());
+        }
+    }
+}
+
+public class ResultProcessor {
+    public static void main(String[] args) throws InterruptedException {
+        Path directory = Paths.get(args.length > 0 ? args[0] : "score-input");
+        int poolSize = args.length > 1 ? Integer.parseInt(args[1]) : 4;
+
+        ExecutorService executor = Executors.newFixedThreadPool(poolSize);
+        ConcurrentLinkedQueue<ProcessingResult> results = new ConcurrentLinkedQueue<>();
+        List<Future<ProcessingResult>> futures = new ArrayList<>();
+
+        long start = System.currentTimeMillis();
+
+        try {
+            if (!Files.isDirectory(directory)) {
+                System.out.println("Input directory not found: " + directory.toAbsolutePath());
+                return;
+            }
+
+            try (DirectoryStream<Path> stream = Files.newDirectoryStream(directory, "*.txt")) {
+                for (Path file : stream) {
+                    futures.add(executor.submit(new ScoreTask(file)));
+                }
+            }
+
+            for (Future<ProcessingResult> future : futures) {
+                try {
+                    results.add(future.get());
+                } catch (ExecutionException e) {
+                    results.add(new ProcessingResult("Unknown", false,
+                            "Unexpected task failure: " + e.getCause()));
+                }
+            }
+
+            int success = 0;
+            int failure = 0;
+            for (ProcessingResult result : results) {
+                System.out.println(result.fileName + " -> " + result.message);
+                if (result.success) success++;
+                else failure++;
+            }
+
+            long elapsed = System.currentTimeMillis() - start;
+            System.out.println("Successful files: " + success);
+            System.out.println("Failed files: " + failure);
+            System.out.println("Total files processed: " + (success + failure));
+            System.out.println("Execution time: " + elapsed + " ms");
+        } catch (IOException e) {
+            System.out.println("Unable to read input directory: " + e.getMessage());
+        } finally {
+            executor.shutdown();
+            if (!executor.awaitTermination(1, TimeUnit.MINUTES)) {
+                executor.shutdownNow();
+            }
+        }
+    }
+}
