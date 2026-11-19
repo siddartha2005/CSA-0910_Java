@@ -1,0 +1,60 @@
+import java.io.*;
+import java.util.*;
+
+public class SalesReportGenerator {
+    public static void manualVersion(String[] inputFiles, String outputFile) {
+        BufferedWriter writer = null;
+        try {
+            writer = new BufferedWriter(new FileWriter(outputFile));
+            writer.write("DAILY SALES REPORT");
+            writer.newLine();
+
+            for (String file : inputFiles) {
+                BufferedReader reader = new BufferedReader(new FileReader(file));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    writer.write(line);
+                    writer.newLine();
+                }
+                reader.close();
+            }
+            System.out.println("Manual report generated: " + outputFile);
+        } catch (IOException e) {
+            System.out.println("Manual version failed: " + e.getMessage());
+        } finally {
+            if (writer != null) {
+                try {
+                    writer.close();
+                } catch (IOException e) {
+                    System.out.println("Writer close error: " + e.getMessage());
+                }
+            }
+        }
+    }
+
+    public static void safeVersion(String[] inputFiles, String outputFile) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile))) {
+            writer.write("DAILY SALES REPORT");
+            writer.newLine();
+
+            for (String file : inputFiles) {
+                try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        writer.write(line);
+                        writer.newLine();
+                    }
+                }
+            }
+            System.out.println("Try-with-resources report generated: " + outputFile);
+        } catch (IOException e) {
+            System.out.println("Try-with-resources version failed: " + e.getMessage());
+        }
+    }
+
+    public static void main(String[] args) {
+        String[] stores = {"store1.txt", "store2.txt", "store3.txt"};
+        manualVersion(stores, "manual-report.txt");
+        safeVersion(stores, "safe-report.txt");
+    }
+}
