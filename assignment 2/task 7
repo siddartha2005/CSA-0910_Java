@@ -1,0 +1,55 @@
+import java.util.*;
+
+class Medicine {
+    final String code;
+    final String name;
+    final int quantity;
+
+    Medicine(String code, String name, int quantity) {
+        this.code = code;
+        this.name = name;
+        this.quantity = quantity;
+    }
+
+    @Override
+    public String toString() {
+        return code + " " + name + " " + quantity;
+    }
+}
+
+public class Q7_Redesign {
+    public static void main(String[] args) {
+        List<Medicine> original = new ArrayList<>();
+        Map<String, Medicine> redesigned = new HashMap<>();
+
+        for (int i = 1; i <= 100000; i++) {
+            Medicine m = new Medicine(
+                String.format("MED%06d", i), "Medicine" + i, i % 100);
+            original.add(m);
+            redesigned.put(m.code, m);
+        }
+
+        String target = "MED099999";
+
+        long start = System.nanoTime();
+        Medicine found = null;
+
+        for (Medicine m : original) {
+            if (m.code.equals(target)) {
+                found = m;
+                break;
+            }
+        }
+
+        long listTime = System.nanoTime() - start;
+
+        start = System.nanoTime();
+        Medicine foundFast = redesigned.get(target);
+        long mapTime = System.nanoTime() - start;
+
+        System.out.println("Original list search found: " + (found != null));
+        System.out.println("Redesigned map search found: " + (foundFast != null));
+        System.out.println("List search ns: " + listTime);
+        System.out.println("HashMap lookup ns: " + mapTime);
+    }
+}
