@@ -1,0 +1,44 @@
+import java.util.*;
+
+public class Q4_PharmacyInventory {
+    static void show(String title, Map<String, Integer> map) {
+        System.out.println(title);
+        for (Map.Entry<String, Integer> entry : map.entrySet()) {
+            System.out.println(entry.getKey() + " : " + entry.getValue());
+        }
+    }
+
+    public static void main(String[] args) {
+        Map<String, Integer> hashMap = new HashMap<>();
+        Map<String, Integer> treeMap = new TreeMap<>();
+        Map<String, Integer> linkedMap = new LinkedHashMap<>();
+
+        String[] codes = {"MED103", "MED101", "MED105", "MED102", "MED104"};
+        int[] stock = {40, 25, 60, 15, 35};
+
+        for (int i = 0; i < codes.length; i++) {
+            hashMap.put(codes[i], stock[i]);
+            treeMap.put(codes[i], stock[i]);
+            linkedMap.put(codes[i], stock[i]);
+        }
+
+        System.out.println("HashMap lookup MED102: " + hashMap.get("MED102"));
+        show("\\nTreeMap - code order:", treeMap);
+        show("\\nLinkedHashMap - insertion order:", linkedMap);
+
+        int n = 100000;
+        long start = System.nanoTime();
+        for (int i = 0; i < n; i++) {
+            hashMap.get(codes[i % codes.length]);
+        }
+        System.out.println("\\n100000 HashMap lookups ns: " +
+                           (System.nanoTime() - start));
+
+        start = System.nanoTime();
+        for (int i = 0; i < n; i++) {
+            treeMap.get(codes[i % codes.length]);
+        }
+        System.out.println("100000 TreeMap lookups ns: " +
+                           (System.nanoTime() - start));
+    }
+}
