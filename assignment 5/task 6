@@ -1,0 +1,8 @@
+import java.io.*; import java.nio.file.*; import java.nio.charset.StandardCharsets; import java.util.*;
+public class PassStore {
+    private final Path file; PassStore(Path file){this.file=file;}
+    public void add(String passId,String regNo,String name,int route,double amount)throws IOException {Files.writeString(file,String.join(",",passId,regNo,name,String.valueOf(route),String.valueOf(amount))+System.lineSeparator(),StandardOpenOption.CREATE,StandardOpenOption.APPEND);}
+    public String[] find(String passId)throws IOException {if(!Files.exists(file))return null;try(BufferedReader br=Files.newBufferedReader(file)){String line;while((line=br.readLine())!=null){String[] f=line.split(",",-1);if(f.length!=5)continue;try{Integer.parseInt(f[3]);Double.parseDouble(f[4]);}catch(NumberFormatException e){continue;}if(f[0].equals(passId))return f;}}return null;}
+    public void listByRoute(int route)throws IOException {if(!Files.exists(file))return;try(BufferedReader br=Files.newBufferedReader(file)){String line;while((line=br.readLine())!=null){String[] f=line.split(",",-1);if(f.length!=5)continue;try{if(Integer.parseInt(f[3])==route)System.out.println(line);}catch(NumberFormatException ignored){}}}}
+    public static void main(String[] args)throws IOException {Path f=Path.of("passes.csv");Files.deleteIfExists(f);PassStore s=new PassStore(f);s.add("P1001","192311001","Arun",12,4500);Files.writeString(f,"P1002,DAMAGED LINE\n",StandardOpenOption.APPEND);s.add("P1003","192311003","Divya",7,3800);System.out.println(Arrays.toString(s.find("P1003")));System.out.println(Arrays.toString(s.find("P1002")));s.listByRoute(7);}
+}
