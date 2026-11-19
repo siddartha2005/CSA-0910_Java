@@ -1,0 +1,30 @@
+import java.io.*;
+import java.nio.file.*;
+
+public class LineCounterComparison {
+    static long countUnbuffered(Path path) throws IOException {
+        long lines = 0; int b; boolean any = false;
+        try (InputStream in = new FileInputStream(path.toFile())) {
+            while ((b = in.read()) != -1) { if (b == '\n') lines++; any = true; }
+        }
+        if (any) { try (RandomAccessFile raf = new RandomAccessFile(path.toFile(), "r")) {
+            if (raf.length() > 0) { raf.seek(raf.length()-1); if (raf.read() != '\n') lines++; }
+        }}
+        return lines;
+    }
+    static long countBuffered(Path path) throws IOException {
+        long lines = 0; String s; boolean any = false;
+        try (BufferedReader br = Files.newBufferedReader(path)) {
+            while ((s = br.readLine()) != null) { lines++; any = true; }
+        }
+        return lines;
+    }
+    public static void main(String[] args) throws IOException {
+        Path p = Path.of(args.length > 0 ? args[0] : "attendance.txt");
+        if (!Files.exists(p)) { Files.write(p, ("Sample attendance line\n").repeat(10000).getBytes()); }
+        long t1 = System.nanoTime(); long a = countUnbuffered(p); long t2 = System.nanoTime();
+        long b = countBuffered(p); long t3 = System.nanoTime();
+        System.out.println("Unbuffered lines=" + a + " time(ms)=" + ((t2-t1)/1_000_000.0));
+        System.out.println("Buffered lines=" + b + " time(ms)=" + ((t3-t2)/1_000_000.0));
+    }
+}
