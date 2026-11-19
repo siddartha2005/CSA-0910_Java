@@ -1,0 +1,10 @@
+import java.io.*; import java.util.*;
+public class HostelSerializationDemo {
+    static class Hostel implements Serializable {private static final long serialVersionUID=1L; List<Room> rooms=new ArrayList<>();}
+    static class Room implements Serializable {private static final long serialVersionUID=1L; int roomNo; List<Resident> residents=new ArrayList<>(); Room(int n){roomNo=n;}}
+    static class Resident implements Serializable {private static final long serialVersionUID=1L; String name,regNo; transient String password; transient Object liveConnection; Resident(String n,String r,String p){name=n;regNo=r;password=p;}}
+    public static void main(String[] args)throws Exception {Hostel h=new Hostel();Room r=new Room(101);r.residents.add(new Resident("Arun","192311001","secret"));h.rooms.add(r);
+        try(ObjectOutputStream o=new ObjectOutputStream(new FileOutputStream("hostel.ser"))){o.writeObject(h);}
+        try(ObjectInputStream i=new ObjectInputStream(new FileInputStream("hostel.ser"))){Hostel restored=(Hostel)i.readObject();Resident x=restored.rooms.get(0).residents.get(0);System.out.println(x.name+" / "+x.regNo+" / password after restore="+x.password);}
+    }
+}
