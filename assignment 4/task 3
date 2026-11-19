@@ -1,0 +1,66 @@
+import javax.swing.*;
+import java.awt.*;
+
+public class LibrarySearch extends JFrame {
+
+    JTextField search = new JTextField(15);
+
+    JComboBox<String> category = new JComboBox<>(
+        new String[]{"All", "Java", "Python", "C++"}
+    );
+
+    JTextArea results = new JTextArea();
+
+    JLabel status = new JLabel("Ready");
+
+    public LibrarySearch() {
+
+        setTitle("Campus Library Search");
+        setLayout(new BorderLayout());
+
+        JPanel top = new JPanel(new FlowLayout());
+
+        JButton searchBtn = new JButton("Search");
+
+        top.add(new JLabel("Library Search"));
+        top.add(search);
+        top.add(category);
+        top.add(searchBtn);
+
+        results.setEditable(false);
+        results.setText("Search Results");
+
+        JPanel bottom = new JPanel(new BorderLayout());
+
+        JPanel buttons = new JPanel(new FlowLayout());
+
+        buttons.add(new JButton("Prev"));
+        buttons.add(new JButton("Next"));
+        buttons.add(new JButton("Reserve"));
+
+        bottom.add(buttons, BorderLayout.CENTER);
+        bottom.add(status, BorderLayout.SOUTH);
+
+        searchBtn.addActionListener(e -> {
+            results.setText(
+                "Searching: " + search.getText() +
+                "\nCategory: " + category.getSelectedItem()
+            );
+
+            status.setText("Search Completed");
+        });
+
+        add(top, BorderLayout.NORTH);
+        add(new JScrollPane(results), BorderLayout.CENTER);
+        add(bottom, BorderLayout.SOUTH);
+
+        setSize(600, 400);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        setVisible(true);
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(LibrarySearch::new);
+    }
+}
