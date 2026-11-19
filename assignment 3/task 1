@@ -1,0 +1,55 @@
+import java.util.Scanner;
+import java.io.File;
+import java.io.FileNotFoundException;
+
+class InvalidWithdrawalException extends Exception {
+    InvalidWithdrawalException(String message) { super(message); }
+}
+
+class InsufficientBalanceException extends Exception {
+    InsufficientBalanceException(String message) { super(message); }
+}
+
+public class ATMWithdrawal {
+    public static void main(String[] args) {
+        Scanner input = new Scanner(System.in);
+        double balance = 5000.0;
+
+        try {
+            File cardReader = new File("card-reader.txt");
+            if (!cardReader.exists()) {
+                throw new FileNotFoundException("Card-reader file is missing.");
+            }
+
+            System.out.print("Enter account number: ");
+            String accountNumber = input.nextLine();
+
+            System.out.print("Enter withdrawal amount: ");
+            double amount = Double.parseDouble(input.nextLine());
+
+            if (accountNumber.trim().isEmpty()) {
+                throw new InvalidWithdrawalException("Account number cannot be empty.");
+            }
+            if (amount <= 0) {
+                throw new InvalidWithdrawalException("Withdrawal amount must be positive.");
+            }
+            if (amount > balance) {
+                throw new InsufficientBalanceException("Insufficient account balance.");
+            }
+
+            balance -= amount;
+            System.out.printf("Withdrawal successful. Cash dispensed: Rs. %.2f%n", amount);
+            System.out.printf("Remaining balance: Rs. %.2f%n", balance);
+
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input: Enter the withdrawal amount as a number.");
+        } catch (InsufficientBalanceException e) {
+            System.out.println("Transaction failed: " + e.getMessage());
+        } catch (InvalidWithdrawalException | FileNotFoundException e) {
+            System.out.println("Transaction failed: " + e.getMessage());
+        } finally {
+            System.out.println("ATM session closed. Thank you.");
+            input.close();
+        }
+    }
+}
