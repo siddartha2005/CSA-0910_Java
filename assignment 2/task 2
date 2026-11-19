@@ -1,0 +1,69 @@
+import java.util.*;
+
+public class Q2_ListComparison {
+    static long timeAddEnd(List<Integer> list, int n) {
+        long start = System.nanoTime();
+        for (int i = 0; i < n; i++) {
+            list.add(i);
+        }
+        return System.nanoTime() - start;
+    }
+
+    static long timeGet(List<Integer> list, int n) {
+        long start = System.nanoTime();
+        long sum = 0;
+        for (int i = 0; i < n; i++) {
+            sum += list.get(i);
+        }
+        if (sum == -1) System.out.println(sum);
+        return System.nanoTime() - start;
+    }
+
+    static long timeIterate(List<Integer> list) {
+        long start = System.nanoTime();
+        long sum = 0;
+        for (int value : list) {
+            sum += value;
+        }
+        if (sum == -1) System.out.println(sum);
+        return System.nanoTime() - start;
+    }
+
+    static long insertFront(List<Integer> list, int n) {
+        long start = System.nanoTime();
+        for (int i = 0; i < n; i++) {
+            list.add(0, i);
+        }
+        return System.nanoTime() - start;
+    }
+
+    public static void main(String[] args) {
+        int[] sizes = {1000, 10000, 50000};
+
+        for (int n : sizes) {
+            List<Integer> arrayList = new ArrayList<>();
+            List<Integer> linkedList = new LinkedList<>();
+
+            long arrayAdd = timeAddEnd(arrayList, n);
+            long linkedAdd = timeAddEnd(linkedList, n);
+
+            System.out.println("\\nSize: " + n);
+            System.out.println("ArrayList add-end ns: " + arrayAdd);
+            System.out.println("LinkedList add-end ns: " + linkedAdd);
+            System.out.println("ArrayList get-all ns: " + timeGet(arrayList, n));
+            System.out.println("LinkedList get-all ns: " + timeGet(linkedList, n));
+            System.out.println("ArrayList iteration ns: " + timeIterate(arrayList));
+            System.out.println("LinkedList iteration ns: " + timeIterate(linkedList));
+            System.out.println("ArrayList front insert ns: " +
+                insertFront(new ArrayList<>(arrayList), n));
+            System.out.println("LinkedList front insert ns: " +
+                insertFront(new LinkedList<>(linkedList), n));
+        }
+
+        ArrayDeque<Integer> upNext = new ArrayDeque<>();
+        upNext.addFirst(10);
+        upNext.addLast(20);
+        upNext.removeFirst();
+        System.out.println("\\nArrayDeque Up Next: " + upNext);
+    }
+}
