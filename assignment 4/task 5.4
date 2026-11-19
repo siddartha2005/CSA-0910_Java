@@ -1,0 +1,63 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+
+public class Converter4 extends JFrame {
+
+    JTextField amount = new JTextField(10);
+
+    JComboBox<String> target = new JComboBox<>(
+        new String[]{"USD", "EUR"}
+    );
+
+    JLabel result = new JLabel();
+
+    public Converter4() {
+
+        setLayout(new FlowLayout());
+
+        JButton button = new JButton("Convert");
+
+        add(amount);
+        add(target);
+        add(button);
+        add(result);
+
+        ActionListener handler = e -> convert();
+
+        button.addActionListener(handler);
+        amount.addActionListener(handler);
+
+        setSize(300, 200);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setVisible(true);
+    }
+
+    void convert() {
+
+        try {
+            double a = Double.parseDouble(amount.getText());
+
+            double rate = target.getSelectedItem()
+                .equals("USD") ? 0.012 : 0.011;
+
+            result.setText(String.format("%.2f", a * rate));
+
+            JOptionPane.showMessageDialog(
+                this, "Converted Amount: " + result.getText()
+            );
+
+        } catch (Exception e) {
+
+            result.setText("Invalid amount");
+
+            JOptionPane.showMessageDialog(
+                this, "Invalid amount"
+            );
+        }
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(Converter4::new);
+    }
+}
