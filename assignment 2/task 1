@@ -1,0 +1,58 @@
+public class Q1_StringBenchmark {
+    static String usingPlus(int fields) {
+        String result = "";
+        for (int i = 0; i < fields; i++) {
+            result += "FIELD" + i + "|";
+        }
+        return result;
+    }
+
+    static String usingBuilder(int fields) {
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < fields; i++) {
+            result.append("FIELD").append(i).append("|");
+        }
+        return result.toString();
+    }
+
+    static String usingBuffer(int fields) {
+        StringBuffer result = new StringBuffer();
+        for (int i = 0; i < fields; i++) {
+            result.append("FIELD").append(i).append("|");
+        }
+        return result.toString();
+    }
+
+    static long measure(java.util.function.IntFunction<String> task,
+                        int fields, int repeats) {
+        long start = System.nanoTime();
+        for (int i = 0; i < repeats; i++) {
+            task.apply(fields);
+        }
+        return (System.nanoTime() - start) / repeats;
+    }
+
+    public static void main(String[] args) {
+        int[][] workloads = {{6, 1}, {50, 10000}, {200, 2000}};
+
+        for (int[] w : workloads) {
+            int fields = w[0];
+            int repeats = w[1];
+
+            for (int i = 0; i < 3; i++) {
+                measure(Q1_StringBenchmark::usingPlus, fields, repeats);
+                measure(Q1_StringBenchmark::usingBuilder, fields, repeats);
+                measure(Q1_StringBenchmark::usingBuffer, fields, repeats);
+            }
+
+            System.out.println("\\nFields = " + fields +
+                               ", repetitions = " + repeats);
+            System.out.println("String +: " +
+                measure(Q1_StringBenchmark::usingPlus, fields, repeats) + " ns");
+            System.out.println("StringBuilder: " +
+                measure(Q1_StringBenchmark::usingBuilder, fields, repeats) + " ns");
+            System.out.println("StringBuffer: " +
+                measure(Q1_StringBenchmark::usingBuffer, fields, repeats) + " ns");
+        }
+    }
+}
