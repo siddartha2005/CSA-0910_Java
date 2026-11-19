@@ -1,0 +1,21 @@
+import java.io.*;
+import java.nio.file.*;
+
+public class FileFormatDemo {
+    public static void main(String[] args) throws IOException {
+        String[] pass = {"P1001", "192311001", "Arun", "12", "Main Gate", "2027-03-31", "4500.00"};
+        Path csv = Path.of("passes.csv");
+        Files.writeString(csv, String.join(",", pass) + System.lineSeparator());
+        System.out.println("Text record written: " + Files.readString(csv).trim());
+        try (DataOutputStream out = new DataOutputStream(new FileOutputStream("passes.dat", true))) {
+            out.writeUTF(pass[0]); out.writeUTF(pass[1]); out.writeUTF(pass[2]);
+            out.writeInt(Integer.parseInt(pass[3])); out.writeUTF(pass[4]);
+            out.writeUTF(pass[5]); out.writeDouble(Double.parseDouble(pass[6]));
+        }
+        System.out.println("Binary record written to passes.dat");
+        try (DataInputStream in = new DataInputStream(new FileInputStream("passes.dat"))) {
+            System.out.println("Binary record: " + in.readUTF() + ", " + in.readUTF() + ", " + in.readUTF()
+                    + ", " + in.readInt() + ", " + in.readUTF() + ", " + in.readUTF() + ", " + in.readDouble());
+        }
+    }
+}
