@@ -1,0 +1,7 @@
+import java.sql.*;
+public class AdversarialInputDemo {
+    static final String URL="jdbc:mysql://localhost:3306/transport", USER="root", PASSWORD="your_password";
+    static boolean unsafe(Connection c,String id,String pwd)throws SQLException {String sql="SELECT 1 FROM users WHERE id='"+id+"' AND pwd='"+pwd+"'";try(Statement s=c.createStatement();ResultSet r=s.executeQuery(sql)){return r.next();}}
+    static boolean safe(Connection c,String id,String pwd)throws SQLException {try(PreparedStatement p=c.prepareStatement("SELECT 1 FROM users WHERE id=? AND pwd=?")){p.setString(1,id);p.setString(2,pwd);try(ResultSet r=p.executeQuery()){return r.next();}}}
+    public static void main(String[] args)throws Exception {try(Connection c=DriverManager.getConnection(URL,USER,PASSWORD)){String payload="' OR '1'='1' -- ";System.out.println("Unsafe payload result: "+unsafe(c,"admin",payload));System.out.println("Prepared payload result: "+safe(c,"admin",payload));}}
+}
